@@ -70,6 +70,7 @@ export default defineConfig({
   resolve: {
     alias: {
       '~': path.resolve(__dirname, './src'),
+      'three-icosa': path.resolve(__dirname, './src/vendor/three-icosa.module.js'),
     },
   },
   define: {

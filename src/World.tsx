@@ -2,6 +2,7 @@ import { SpawnPoint } from '@xrift/world-components'
 import { RigidBody } from '@react-three/rapier'
 import { useRef } from 'react'
 import { Mesh } from 'three'
+import { OpenBrushSketch } from './components/OpenBrushSketch'
 import { Skybox } from './components/Skybox'
 import { COLORS, WORLD_CONFIG } from './constants'
 
@@ -71,6 +72,9 @@ export const World: React.FC<WorldProps> = ({ position = [0, 0, 0], scale = 1 })
 
       {/* ========== スポーン地点 ========== */}
       <SpawnPoint />
+
+      {/* ========== Open Brush データ表示 ========== */}
+      <OpenBrushSketch url="openbrush-sketch.glb" position={[0, 0.5, 0]} />
     </group>
   )
 }
