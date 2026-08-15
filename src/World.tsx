@@ -2,7 +2,8 @@ import { SpawnPoint } from '@xrift/world-components'
 import { RigidBody } from '@react-three/rapier'
 import { useRef } from 'react'
 import { Mesh } from 'three'
-import { OpenBrushSketch } from './components/OpenBrushSketch'
+import { OpenBrushDisplayStand } from './components/OpenBrushDisplayStand'
+import { GalleryRoom } from './components/GalleryRoom'
 import { Skybox } from './components/Skybox'
 import { COLORS, WORLD_CONFIG } from './constants'
 
@@ -22,10 +23,12 @@ export const World: React.FC<WorldProps> = ({ position = [0, 0, 0], scale = 1 })
 
       {/* ========== 環境・照明 ========== */}
       <Skybox radius={500} />
-      <ambientLight intensity={0.3} />
+      {/* 周囲は暗く、展示物へ当たる温かい光のみ */}
+      <ambientLight intensity={0.15} color="#c9c1b8" />
       <directionalLight
         position={[5, 10, 5]}
-        intensity={1.5}
+        intensity={0.6}
+        color="#fff2dc"
         castShadow
         shadow-mapSize-width={512}
         shadow-mapSize-height={512}
@@ -35,6 +38,7 @@ export const World: React.FC<WorldProps> = ({ position = [0, 0, 0], scale = 1 })
         shadow-camera-top={30}
         shadow-camera-bottom={-30}
       />
+      <pointLight position={[0, 6, -3.5]} intensity={14} distance={18} color="#ffd9a0" />
 
       {/* ========== 床 ========== */}
       <RigidBody type="fixed" colliders="cuboid" restitution={0} friction={0}>
@@ -73,8 +77,11 @@ export const World: React.FC<WorldProps> = ({ position = [0, 0, 0], scale = 1 })
       {/* ========== スポーン地点 ========== */}
       <SpawnPoint />
 
-      {/* ========== Open Brush データ表示 ========== */}
-      <OpenBrushSketch url="openbrush-sketch.glb" position={[0, 0.5, 0]} />
+      {/* ========== Open Brush 展示台 ========== */}
+      <OpenBrushDisplayStand position={[0, 0, -3.5]} />
+
+      {/* ========== 展示スペース（部屋・額縁式） ========== */}
+      <GalleryRoom position={[15, 0, 0]} />
     </group>
   )
 }

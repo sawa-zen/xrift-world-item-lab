@@ -5,6 +5,6 @@ export const WORLD_CONFIG = {
 } as const
 
 export const COLORS = {
-  ground: '#90EE90',
-  wall: '#8B4513',
+  ground: '#1c1e22', // 暗いスレート床
+  wall: '#23262c', // 暗いコンクリート壁
 } as const
