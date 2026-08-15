@@ -318,7 +318,9 @@ export const OpenBrushDisplayStand: React.FC<OpenBrushDisplayStandProps> = ({
           onInteract={() => uploadFile()}
           interactionText={shown ? '作品を差し替える' : '作品をアップロード'}
         >
-          <mesh position={[0, BASE_H / 2, 0]} castShadow receiveShadow>
+          {/* receiveShadow は付けない。天面スラブが台座より 0.2 広いため、
+              その庇の影が低解像度のシャドウマップで汚く落ちてしまう */}
+          <mesh position={[0, BASE_H / 2, 0]} castShadow>
             <boxGeometry args={[baseSize, BASE_H, baseSize]} />
             <meshLambertMaterial color={CONCRETE} />
           </mesh>
@@ -331,8 +333,10 @@ export const OpenBrushDisplayStand: React.FC<OpenBrushDisplayStandProps> = ({
         <meshLambertMaterial color={CONCRETE} />
       </mesh>
 
-      {/* 赤フェルトのマット（天面スラブの上） */}
-      <mesh position={[0, BASE_H + SLAB_H + MAT_H / 2, 0]} castShadow receiveShadow>
+      {/* 赤フェルトのマット（天面スラブの上）。
+          スラブとの間隔が 0.01 しかなく、receiveShadow を付けるとスラブ自身の影が
+          シャドウアクネとして乗るため受けない */}
+      <mesh position={[0, BASE_H + SLAB_H + MAT_H / 2, 0]} castShadow>
         <boxGeometry args={[slabSize, MAT_H, slabSize]} />
         <meshStandardMaterial color={FELT} roughness={0.95} metalness={0} />
       </mesh>
