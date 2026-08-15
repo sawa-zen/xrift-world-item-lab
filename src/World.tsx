@@ -3,7 +3,6 @@ import { RigidBody } from '@react-three/rapier'
 import { useRef } from 'react'
 import { Mesh } from 'three'
 import { OpenBrushDisplayStand } from './components/OpenBrushDisplayStand'
-import { GalleryRoom } from './components/GalleryRoom'
 import { Skybox } from './components/Skybox'
 import { COLORS, WORLD_CONFIG } from './constants'
 
@@ -78,10 +77,19 @@ export const World: React.FC<WorldProps> = ({ position = [0, 0, 0], scale = 1 })
       <SpawnPoint />
 
       {/* ========== Open Brush 展示台 ========== */}
-      <OpenBrushDisplayStand position={[0, 0, -3.5]} />
-
-      {/* ========== 展示スペース（部屋・額縁式） ========== */}
-      <GalleryRoom position={[15, 0, 0]} />
+      {/* サンプル作品を載せた展示台（従来と同じ medium サイズ） */}
+      <OpenBrushDisplayStand
+        id="stand-sample"
+        position={[0, 0, -3.5]}
+        size="medium"
+        sampleFile="openbrush-sketch.glb"
+        sampleName="サンプル作品"
+      />
+      {/* 小・中・大の空き展示台。高さは共通で、広さだけが変わる */}
+      {/* 台同士の間に 1.3m 以上の通路が空くよう、天面スラブの幅を見て配置している */}
+      <OpenBrushDisplayStand id="stand-small" position={[3, 0, -3.5]} size="small" />
+      <OpenBrushDisplayStand id="stand-medium" position={[6, 0, -3.5]} size="medium" />
+      <OpenBrushDisplayStand id="stand-large" position={[10, 0, -3.5]} size="large" />
     </group>
   )
 }
