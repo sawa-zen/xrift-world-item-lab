@@ -222,7 +222,8 @@ export const OpenBrushDisplayStand: React.FC<OpenBrushDisplayStandProps> = ({
     requestFileInput({
       id: `${id}-upload`,
       accept: '.glb',
-      maxSize: 50 * 1024 * 1024,
+      // maxSize は指定しない（ワールド側でサイズ制限をかけない）。
+      // プラットフォーム側の上限に当たった場合は onError / アップロード失敗で拾う
       onSelect: async (files) => {
         const file = files[0]
         if (!file) return
@@ -280,7 +281,7 @@ export const OpenBrushDisplayStand: React.FC<OpenBrushDisplayStandProps> = ({
       onError: (error) => {
         showMessage(
           error.type === 'file_too_large'
-            ? 'ファイルが大きすぎます（50MBまで）'
+            ? 'ファイルが大きすぎます'
             : '.glb ファイルを選んでください',
         )
       },
