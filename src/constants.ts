@@ -9,4 +9,8 @@ export const WORLD_CONFIG = {
 export const COLORS = {
   ground: '#585c62', // 少し暗めのグレー（床）
   wall: '#6a6e76', // 床よりわずかに明るいグレー（壁）
+  // スカイボックスは meshBasicMaterial（＝ライティングを受けない）なので、
+  // 壁と同じ hex にすると壁より明るく浮いてしまう。
+  // 照明を受けたあとの壁の見え方に合わせて一段暗くした値を置いている。
+  sky: '#4a4e55',
 } as const
