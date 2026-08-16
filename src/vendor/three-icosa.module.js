@@ -1350,6 +1350,20 @@ function $4fdc68aa1ebb2033$var$getDefaultNormalTexture() {
     }
     return $4fdc68aa1ebb2033$var$defaultNormalTexture;
 }
+/**
+ * tiltBrushMaterialParams の 1 エントリを再帰的に複製する。
+ * Vector3 / Vector4 / Texture などは clone() を使い、それ以外は素の配列 / オブジェクトとして複製する。
+ */
+function $4fdc68aa1ebb2033$var$cloneMaterialParams(value) {
+    if (Array.isArray(value)) return value.map($4fdc68aa1ebb2033$var$cloneMaterialParams);
+    if (value !== null && typeof value === "object") {
+        if (typeof value.clone === "function") return value.clone();
+        const copy = {};
+        for(const key in value)copy[key] = $4fdc68aa1ebb2033$var$cloneMaterialParams(value[key]);
+        return copy;
+    }
+    return value;
+}
 class $4fdc68aa1ebb2033$export$bcc22bf437a07d8f extends $fugmd$Loader {
     constructor(manager, options = {}){
         super(manager);
@@ -1387,6 +1401,25 @@ class $4fdc68aa1ebb2033$export$bcc22bf437a07d8f extends $fugmd$Loader {
             onLoad(scope.parse(isAlreadyLoaded));
             return;
         }
+        // 同じブラシに対する同時ロードを 1 本にまとめる（重複ロード・競合防止）
+        if (this.pendingMaterials === undefined) this.pendingMaterials = {};
+        let pending = this.pendingMaterials[brushName];
+        if (pending === undefined) {
+            pending = this.loadMaterial(brushName);
+            this.pendingMaterials[brushName] = pending;
+            pending.catch(()=>{}).then(()=>{
+                delete this.pendingMaterials[brushName];
+            });
+        }
+        try {
+            const material = await pending;
+            onLoad(scope.parse(material));
+        } catch (error) {
+            if (onError) onError(error);
+            else throw error;
+        }
+    }
+    async loadMaterial(brushName) {
         const loader = new $fugmd$FileLoader(this.manager);
         loader.setPath(this.path);
         loader.setResponseType("text");
@@ -1394,8 +1427,12 @@ class $4fdc68aa1ebb2033$export$bcc22bf437a07d8f extends $fugmd$Loader {
         const textureLoader = new $fugmd$TextureLoader(this.manager);
         textureLoader.setPath(this.path);
         textureLoader.setWithCredentials(this.withCredentials);
-        const materialParams = $4fdc68aa1ebb2033$var$tiltBrushMaterialParams[brushName];
-        if (!materialParams) return;
+        const brushParams = $4fdc68aa1ebb2033$var$tiltBrushMaterialParams[brushName];
+        if (!brushParams) throw new Error(`[TiltShaderLoader] Unknown brush: ${brushName}`);
+        // tiltBrushMaterialParams はモジュール共有の定義テーブル。
+        // 以降の処理で vertexShader / uniforms を書き換えるため必ず複製してから使う。
+        // （そのまま書き換えると 2 つ目以降の GLB でシェーダーソースが URL として fetch される）
+        const materialParams = $4fdc68aa1ebb2033$var$cloneMaterialParams(brushParams);
         // Load shaders
         const vertexShaderText = await loader.loadAsync(materialParams.vertexShader);
         let fragmentShaderText = await loader.loadAsync(materialParams.fragmentShader);
@@ -1485,7 +1522,7 @@ class $4fdc68aa1ebb2033$export$bcc22bf437a07d8f extends $fugmd$Loader {
         for(var fogType in $fugmd$UniformsLib.fog)materialParams.uniforms[fogType] = $fugmd$UniformsLib.fog[fogType];
         const material = this.createMaterial(materialParams, brushName);
         this.loadedMaterials[brushName] = material;
-        onLoad(scope.parse(material));
+        return material;
     }
     parse(rawMaterial) {
         return rawMaterial;
