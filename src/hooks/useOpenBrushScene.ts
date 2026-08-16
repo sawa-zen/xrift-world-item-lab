@@ -2,8 +2,23 @@ import { useGLTF } from '@react-three/drei'
 import { useXRift } from '@xrift/world-components'
 import { GLTFGoogleTiltBrushMaterialExtension } from 'three-icosa'
 import { useMemo } from 'react'
-import type { Group } from 'three'
+import type { Group, Object3D } from 'three'
 import type { GLTF } from 'three-stdlib'
+
+/**
+ * onBeforeRender / onAfterRender を元のツリーから複製後のツリーへ移し替える。
+ *
+ * three の Object3D.copy() はこの 2 つを引き継がない。
+ * three-icosa は onBeforeRender で u_time（ブラシのアニメーション）や
+ * cameraPosition・ライト・フォグの uniform を毎フレーム更新しているため、
+ * 移し替えないと clone した作品のエフェクトが止まったまま表示される。
+ */
+const copyRenderHooks = (source: Object3D, target: Object3D) => {
+  target.onBeforeRender = source.onBeforeRender
+  target.onAfterRender = source.onAfterRender
+  const count = Math.min(source.children.length, target.children.length)
+  for (let i = 0; i < count; i++) copyRenderHooks(source.children[i], target.children[i])
+}
 
 /**
  * Open Brush からエクスポートした GLB を読み込み、そのまま配置できる scene を返す。
@@ -25,5 +40,9 @@ export const useOpenBrushScene = (url: string): Group => {
     )
   }) as GLTF
 
-  return useMemo(() => scene.clone(), [scene])
+  return useMemo(() => {
+    const copy = scene.clone()
+    copyRenderHooks(scene, copy)
+    return copy
+  }, [scene])
 }
